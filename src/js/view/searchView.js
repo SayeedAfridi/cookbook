@@ -6,7 +6,29 @@ const baseUrl = 'https://spoonacular.com/recipeImages/'
 
 export const clearInput = () => (elements.searchInput.value = '')
 
-export const clearResults = () => (elements.resultsList.innerHTML = '')
+export const clearResults = () => {
+  elements.resultsList.innerHTML = ''
+  elements.resultPages.innerHTML = ''
+}
+
+//Fruit pizza djadjkfal
+//0+5=5
+//5+5=10
+
+const limitRecipeTitle = (title, limit = 17) => {
+  const newTitle = []
+  if (title.length > limit) {
+    title.split(' ').reduce((acc, cur) => {
+      if (acc + cur.length <= limit) {
+        newTitle.push(cur)
+      }
+      return acc + cur.length
+    }, 0)
+
+    return `${newTitle.join(' ')}...`
+  }
+  return title
+}
 
 const renderRecipe = (recipe) => {
   const markup = `
@@ -16,8 +38,10 @@ const renderRecipe = (recipe) => {
               <img src="${baseUrl}${recipe.image}" alt="${recipe.title}">
           </figure>
           <div class="likes__data">
-              <h4 class="likes__name">${recipe.title}</h4>
-              <p class="likes__author">Ready in: ${recipe.readyInMinutes} mins</p>
+              <h4 class="likes__name">${limitRecipeTitle(recipe.title)}</h4>
+              <p class="likes__author">Ready in: ${
+                recipe.readyInMinutes
+              } mins</p>
           </div>
       </a>
   </li>
@@ -26,6 +50,40 @@ const renderRecipe = (recipe) => {
   elements.resultsList.insertAdjacentHTML('beforeend', markup)
 }
 
-export const renderResults = (recipies) => {
-  recipies.forEach(renderRecipe)
+//type next or prev
+
+const createButton = (page, type) => `
+<button class="btn-inline results__btn--${type}" data-goto=${
+  type === 'prev' ? page - 1 : page + 1
+} >
+  <span>Page ${type === 'prev' ? page - 1 : page + 1}</span>
+  <svg class="search__icon">
+      <use href="img/icons.svg#icon-triangle-${
+        type === 'prev' ? 'left' : 'right'
+      }"></use>
+  </svg>
+</button>
+`
+
+const renderButton = (page, numResults, resPerPage) => {
+  const pages = Math.ceil(numResults / resPerPage)
+  let button
+  if (page === 1 && pages > 1) {
+    //only button goto next page
+    button = createButton(page, 'next')
+  } else if (page < pages) {
+    //both button
+    button = `${createButton(page, 'prev')}${createButton(page, 'next')}`
+  } else if (page === pages && pages > 1) {
+    //only button goto prev page
+    button = createButton(page, 'prev')
+  }
+  elements.resultPages.insertAdjacentHTML('afterbegin', button)
+}
+
+export const renderResults = (recipies, page = 1, resPerPage = 10) => {
+  const start = (page - 1) * resPerPage
+  const end = page * resPerPage
+  recipies.slice(start, end).forEach(renderRecipe)
+  renderButton(page, recipies.length, resPerPage)
 }
