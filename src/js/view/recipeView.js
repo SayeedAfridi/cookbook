@@ -6,15 +6,30 @@ const createIng = (ing) => `
     <svg class="recipe__icon">
         <use href="img/icons.svg#icon-check"></use>
     </svg>
-    <div class="recipe__count">${new Fraction(
-      ing.amount.us.value
-    ).toString()}</div>
+    <div class="recipe__count">${formatValue(ing.amount.us.value)}</div>
     <div class="recipe__ingredient">
         <span class="recipe__unit">${ing.amount.us.unit}</span>
         ${ing.name}
     </div>
 </li>
 `
+
+const formatValue = (value) => {
+  if (value) {
+    const newValue = (value * 100) / 100
+    const [int, dec] = newValue
+      .toString()
+      .split('.')
+      .map((el) => parseInt(el, 10))
+    if (!dec) return newValue
+    if (int === 0) {
+      return new Fraction(newValue).toString()
+    } else {
+      const fr = new Fraction(newValue - int)
+      return `${int} ${fr.numerator}/${fr.denominator}`
+    }
+  }
+}
 
 export const clearRecipe = () => (elements.recipe.innerHTML = '')
 
@@ -46,12 +61,12 @@ export const renderRecipe = (recipe) => {
           <span class="recipe__info-text"> servings</span>
 
           <div class="recipe__info-buttons">
-              <button class="btn-tiny">
+              <button class="btn-tiny btn-decrease">
                   <svg>
                       <use href="img/icons.svg#icon-circle-with-minus"></use>
                   </svg>
               </button>
-              <button class="btn-tiny">
+              <button class="btn-tiny btn-increase">
                   <svg>
                       <use href="img/icons.svg#icon-circle-with-plus"></use>
                   </svg>
@@ -73,7 +88,7 @@ export const renderRecipe = (recipe) => {
         ${recipe.ingredients.map(createIng).join('')}
       </ul>
 
-      <button class="btn-small recipe__btn">
+      <button class="btn-small recipe__btn addto-shopping">
           <svg class="search__icon">
               <use href="img/icons.svg#icon-shopping-cart"></use>
           </svg>
@@ -97,4 +112,15 @@ export const renderRecipe = (recipe) => {
 `
 
   elements.recipe.insertAdjacentHTML('afterbegin', markup)
+}
+
+export const updateServingsIngs = (recipe) => {
+  document.querySelector('.recipe__info-data--people').textContent =
+    recipe.servings
+
+  const ingArr = Array.from(document.querySelectorAll('.recipe__count'))
+  ingArr.forEach(
+    (el, i) =>
+      (el.textContent = formatValue(recipe.ingredients[i].amount.us.value))
+  )
 }

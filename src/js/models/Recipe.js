@@ -25,4 +25,17 @@ export default class Recipe {
       console.log(err)
     }
   }
+
+  // 8 ----- 2cups
+  // 9 ---   2*9/8
+
+  updateServings(type) {
+    const newServings = type === 'dec' ? this.servings - 1 : this.servings + 1
+
+    this.ingredients.forEach((el) => {
+      el.amount.us.value *= newServings / this.servings
+    })
+
+    this.servings = newServings
+  }
 }

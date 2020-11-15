@@ -15,6 +15,14 @@ export const clearResults = () => {
 //0+5=5
 //5+5=10
 
+export const highlightSelected = (id) => {
+  const resultArr = Array.from(document.querySelectorAll('.results__link'))
+  resultArr.forEach((el) => el.classList.remove('results__link--active'))
+  document
+    .querySelector(`.results__link[href="#${id}"]`)
+    .classList.add('results__link--active')
+}
+
 const limitRecipeTitle = (title, limit = 17) => {
   const newTitle = []
   if (title.length > limit) {
@@ -33,13 +41,13 @@ const limitRecipeTitle = (title, limit = 17) => {
 const renderRecipe = (recipe) => {
   const markup = `
   <li>
-      <a class="likes__link" href="#${recipe.id}">
-          <figure class="likes__fig">
+      <a class="results__link" href="#${recipe.id}">
+          <figure class="results__fig">
               <img src="${baseUrl}${recipe.image}" alt="${recipe.title}">
           </figure>
-          <div class="likes__data">
-              <h4 class="likes__name">${limitRecipeTitle(recipe.title)}</h4>
-              <p class="likes__author">Ready in: ${
+          <div class="results__data">
+              <h4 class="results__name">${limitRecipeTitle(recipe.title)}</h4>
+              <p class="results__author">Ready in: ${
                 recipe.readyInMinutes
               } mins</p>
           </div>
